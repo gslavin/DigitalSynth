@@ -26,7 +26,7 @@ addpath('../Plugins/')
 
 % Edit the above text to modify the response to help testGUI
 
-% Last Modified by GUIDE v2.5 09-Aug-2014 18:42:57
+% Last Modified by GUIDE v2.5 20-Aug-2014 10:28:15
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -175,6 +175,7 @@ global currentControl;
 global alpha;
 global sampleAudio;
 global songAudio;
+global thresholdFlag;
 
 if ~isfield(handles,'initialized') % this sets up an if statement that
     % prevents the user from causing an error in the GUI if they were to
@@ -191,8 +192,6 @@ else
 
     % filtered results
     gxdataFiltered = zeros(buf_len,1);
-    gydataFiltered = zeros(buf_len,1);
-    magdataFiltered = zeros(buf_len,1);
 
     while(dataFlag == 1) % sets up a while loop to do a rolling plot
         handles.alpha = get(handles.(alpha.sliderName), 'Value');
@@ -205,17 +204,28 @@ else
         axes(handles.AccelPlot); 
         
         gxFiltered = gx*(1-handles.alpha) + gxdataFiltered(end)*(handles.alpha);
-        gyFiltered = gy*(1-handles.alpha) + gydataFiltered(end)*(handles.alpha);
-        magFiltered = mag*(1-handles.alpha) + magdataFiltered(end)*(handles.alpha);
 
         gxdataFiltered = [gxdataFiltered(2:end) ; gxFiltered]; % updates the plot for x
-        gydataFiltered = [gydataFiltered(2:end) ; gyFiltered]; % updates the plot for y
-        magdataFiltered = [magdataFiltered(2:end) ; magFiltered]; % updates the mag data
 
-        % subplot for resultant magnitude, x and y magnitude
-        plot(index,magdataFiltered, 'k',index,gxdataFiltered,'b',index,gydataFiltered,'r');
+        if (thresholdFlag==0)
+            % subplot for resultant magnitude, x and y magnitude
+            plot(index,gxdataFiltered,'b');
+        else
+            % gets the threshold value and creates a thresh. line to plot
+            thresh1Val = 0.8;
+            thresh2Val = 0.3;
+            thresh3Val = -0.3;
+            thresh4Val = -0.8;
+            threshold1Data = thresh1Val*ones(buf_len,1);
+            threshold2Data = thresh2Val*ones(buf_len,1);
+            threshold3Data = thresh3Val*ones(buf_len,1);
+            threshold4Data = thresh4Val*ones(buf_len,1);
+            plot(index,gxdataFiltered,'b',index,threshold1Data,...
+                'm',index,threshold2Data,'k',index,threshold3Data,...
+                'c',index,threshold4Data,'g');
+        end
 
-        axis([1 buf_len -2 2]);  % sets up axis limits
+        axis([1 buf_len -1 1]);  % sets up axis limits
         xlabel('time'); % sets an x axis label
         ylabel('Mag of acceleration'); % sets a y axis label
         grid on
@@ -450,7 +460,7 @@ if (handles.setupState == 1) % sets up an if statement that checks if the setupS
     disp('COM already set up') % if the initialization is already done, nothing happens and a message is printed out
 else
     %run the COM serial code to initialize it
-    comPort = 'COM11'; % sets the COM port that the Arduino is connected to
+    comPort = 'COM4'; % sets the COM port that the Arduino is connected to
     if (~exist('serialFlag','var')) % sets up the serial connection using setupSerial
         [handles.accelerometer.s,handles.serialFlag] = setupSerial(comPort);
     end
@@ -1000,31 +1010,6 @@ function effectMenu_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns effectMenu contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from effectMenu
-global currentSongBlock;
-global song;
-songSelect = get(handles.waveformSelect,'Value');
-switch songSelect
-    case 1
-        select = get(handles.effectMenu,'Value');
-        switch select
-            case 1 % repeat
-                song = RepeatGUI(song);
-            case 2 % normalize
-                song = NormalizeGUI(song);
-            case 3 % delay
-                song = DelayGUI(song);
-        end
-    case 2
-        select = get(handles.effectMenu,'Value');
-        switch select
-            case 1 % repeat
-                currentSongBlock = RepeatGUI(currentSongBlock);
-            case 2 % normalize
-                currentSongBlock = NormalizeGUI(currentSongBlock);
-            case 3 % delay
-                currentSongBlock = DelayGUI(currentSongBlock);
-        end
-end
 waveformSelect_Callback(hObject, eventdata, handles); % update the waveform graph
 
 % --- Executes during object creation, after setting all properties.
@@ -1045,8 +1030,35 @@ function effectButton_Callback(hObject, eventdata, handles)
 % hObject    handle to effectButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+global currentSongBlock;
+global song;
+audio = [];
+songSelect = get(handles.waveformSelect,'Value');
+switch songSelect
+    case 1 
+        audio = song;
+    case 2
+        audio = currentSongBlock;
+end
 % TODO: calls appropriate effect GUI
+valueName = get(handles.effectMenu, 'String');
+valIndex = get(handles.effectMenu, 'Value');
+% Get current setting name
+valueName = valueName{valIndex};
+% remove newlines on last entry
+while (valueName(end) == sprintf('\r') ||...
+       valueName(end) == sprintf('\n'))
+   valueName = valueName(1:end-1); 
+end
+funcName = str2func(strcat(valueName,'GUI'));
+audio = funcName(audio);
+switch songSelect
+    case 1 
+        song = audio;
+    case 2
+        currentSongBlock = audio;
+end
+waveformSelect_Callback(hObject, eventdata, handles); 
 
 
 % --- Executes on button press in muteCurrentBlock.
@@ -1056,3 +1068,25 @@ function muteCurrentBlock_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of muteCurrentBlock
+
+
+% --- Executes on button press in thresholdButton.
+function thresholdButton_Callback(hObject, eventdata, handles)
+% hObject    handle to thresholdButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Declares global
+global thresholdFlag;
+% Gets the string attached to thresholdOn and stores it
+strVal = get(handles.thresholdButton,'String');
+% The if statement below changes the threshold flag to turn the threshold on or off and also changes the
+% string on the button
+if (strcmp(strVal,'Visualize thresholds!'))
+    set(handles.thresholdButton,'String','Turn off visualization');
+    thresholdFlag = 1;
+    % set threshold text to off, display threshold on graph
+else
+    set(handles.thresholdButton,'String','Visualize thresholds!');
+    thresholdFlag = 0;
+    % set threshold text to on, take display off graph
+end
