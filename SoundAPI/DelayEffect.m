@@ -13,7 +13,7 @@ delaySig = sigDelayNoVolumeAdjust*volume;
 delaySigSize = size(delaySig);
 originalSigSize = size(sig);
 % finds the difference in length between the two signals
-signalSizeDiff = delaySigSize(2) - originalSigSize(2)
+signalSizeDiff = delaySigSize(2) - originalSigSize(2);
 % adds the two signals together to get the delay effect
 output_sig = AddSignals(sig,delaySig);
 % trims the difference in signal length off of the end of the signal so
