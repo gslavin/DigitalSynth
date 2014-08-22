@@ -26,7 +26,7 @@ addpath('../Plugins/')
 
 % Edit the above text to modify the response to help testGUI
 
-% Last Modified by GUIDE v2.5 20-Aug-2014 10:28:15
+% Last Modified by GUIDE v2.5 21-Aug-2014 23:30:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -134,6 +134,11 @@ imshow('macro-knob.jpg');
 
 axes(handles.knob2);
 imshow('macro-knob.jpg');
+
+% Auto connect to available serial
+serialInfo = instrhwinfo('serial');
+comNumber = serialInfo.AvailableSerialPorts{1};
+set(handles.comPort, 'String', comNumber);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -267,10 +272,7 @@ slider = handles.(currentOsc.sliderName);
 valueName = get(setting, 'String');
 valIndex = get(setting, 'Value');
 valueName = valueName{valIndex};
-while (valueName(end) == sprintf('\r') ||...
-       valueName(end) == sprintf('\n'))
-   valueName = valueName(1:end-1); 
-end
+valueName = strtrim(valueName);
 valSlider = get(slider, 'Value');
 currentOsc.(lower(valueName)) = valSlider;
 if strcmp(currentOsc.settingName, 'settingSelect1')
@@ -338,10 +340,7 @@ function [tone] = getToneFunction(handles, waveSelMenu)
     valIndex = get(handles.(waveSelMenu), 'Value');
     funcName = funcName{valIndex};
     % Last function in will have CR that must be removed
-    while (funcName(end) == sprintf('\r') ||...
-           funcName(end) == sprintf('\n'))
-       funcName = funcName(1:end-1); 
-    end
+    funcName = strtrim(funcName);
     tone = str2func(funcName);
     
     
@@ -460,7 +459,8 @@ if (handles.setupState == 1) % sets up an if statement that checks if the setupS
     disp('COM already set up') % if the initialization is already done, nothing happens and a message is printed out
 else
     %run the COM serial code to initialize it
-    comPort = 'COM4'; % sets the COM port that the Arduino is connected to
+    comPort = get(handles.comPort, 'String');% sets the COM port that the Arduino is connected to
+    strtrim(comPort)
     if (~exist('serialFlag','var')) % sets up the serial connection using setupSerial
         [handles.accelerometer.s,handles.serialFlag] = setupSerial(comPort);
     end
@@ -623,10 +623,7 @@ valIndex = get(setting, 'Value');
 % Get current setting name
 valueName = lower(valueName{valIndex});
 % remove newlines on last entry
-while (valueName(end) == sprintf('\r') ||...
-       valueName(end) == sprintf('\n'))
-   valueName = valueName(1:end-1); 
-end
+valueName = strtrim(valueName);
 % Update the slider with the stored value of the current setting
 set(handles.(currentControl.sliderName),...
     'Value', currentControl.(valueName));
@@ -1046,10 +1043,7 @@ valIndex = get(handles.effectMenu, 'Value');
 % Get current setting name
 valueName = valueName{valIndex};
 % remove newlines on last entry
-while (valueName(end) == sprintf('\r') ||...
-       valueName(end) == sprintf('\n'))
-   valueName = valueName(1:end-1); 
-end
+valueName = strtrim(valueName);
 funcName = str2func(strcat(valueName,'GUI'));
 audio = funcName(audio);
 switch songSelect
@@ -1089,4 +1083,28 @@ else
     set(handles.thresholdButton,'String','Visualize thresholds!');
     thresholdFlag = 0;
     % set threshold text to on, take display off graph
+end
+
+
+
+
+function comPort_Callback(hObject, eventdata, handles)
+% hObject    handle to comPort (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of comPort as text
+%        str2double(get(hObject,'String')) returns contents of comPort as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function comPort_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to comPort (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
