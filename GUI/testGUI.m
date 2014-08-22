@@ -57,8 +57,6 @@ function testGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
 %initialize comport variables
 handles.setupState = 0;
-global filterDataFlag;
-filterDataFlag = 0;
 global thresholdFlag;
 thresholdFlag = 0;
 global overThresholdFlag;
@@ -67,6 +65,7 @@ global sampleStartFlag;
 sampleStartFlag = 0;
 global songStartFlag;
 songStartFlag = 0;
+global calCo;
 
 % Initialize oscillator states
 global osc1;
@@ -181,6 +180,7 @@ global alpha;
 global sampleAudio;
 global songAudio;
 global thresholdFlag;
+global calCo;
 
 if ~isfield(handles,'initialized') % this sets up an if statement that
     % prevents the user from causing an error in the GUI if they were to
@@ -202,7 +202,7 @@ else
         handles.alpha = get(handles.(alpha.sliderName), 'Value');
         % Get the new values from the accelerometer and store them in gx,
         % gy, and gz
-        [gx gy gz] = readAcc(handles.accelerometer, handles.calCo);
+        [gx gy gz] = readAcc(handles.accelerometer, calCo);
 
         mag = norm([gx gy]);
         % calls the axes from the AccelPlot
@@ -453,10 +453,17 @@ function ComSetup_Callback(hObject, eventdata, handles)
 % this funtion - for use with 'go' function to check if initialized for
 % example
 handles.initialized = 1;
-
+% calls in globals to be used in the if statement below
+global dataFlag;
+global calCo;
 if (handles.setupState == 1) % sets up an if statement that checks if the setupState is 1
-    %tell user it is already setup
-    disp('COM already set up') % if the initialization is already done, nothing happens and a message is printed out
+    if (dataFlag == 1)
+        uiwait(msgbox('Stopping to recalibrate'));
+        uiresume;
+        dataFlag=0;
+    end
+    % sets up the calibration after serial connection using calibrate
+    calCo = calibrate(handles.accelerometer.s);
 else
     %run the COM serial code to initialize it
     comPort = get(handles.comPort, 'String');% sets the COM port that the Arduino is connected to
@@ -464,13 +471,17 @@ else
     if (~exist('serialFlag','var')) % sets up the serial connection using setupSerial
         [handles.accelerometer.s,handles.serialFlag] = setupSerial(comPort);
     end
-    if(~exist('calCo', 'var')) % sets up the calibration after serial connection using calibrate
-        handles.calCo = calibrate(handles.accelerometer.s);
+    if(~exist(calCo, 'var')) % sets up the calibration after serial connection using calibrate
+        calCo = calibrate(handles.accelerometer.s);
     end
     % sets the setupState to 1 indicating setup is complete
     handles.setupState = 1;
     set(handles.initText, 'Visible', 'on')
+    % sets the initialize button text to say recalibrate so the user knows
+    % it can be used for recalibration
+    set(handles.ComSetup,'String','Recalibrate');
 end
+
 % Update handles structure
 guidata(hObject, handles);
 
