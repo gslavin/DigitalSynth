@@ -26,9 +26,11 @@ function [ output_sig ] = GenChordSeq(seq, duration, volume, damping, wave_type)
         temp = zeros(1,length(t));
         % Build chords
         for j = 1:seg_rows
+            if (seq(i)~=-Inf)
             freq = 2^((chord(j)-49)/12)*440;
             sig = (volume(j,i)/seg_rows)*wave_type(t, freq, damping(j,i));
             temp = AddSignals(temp, sig);
+            end
         end 
         output_sig = AppendSignals(output_sig, temp);
     end
