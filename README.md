@@ -21,17 +21,23 @@ If you want to move on to a new block of the song, press the "Append" button. Th
 NOTE: When working on a new block, always remember to press the "Reset Sample" button, unless you wish to include your entire previous block's signal in your next block.
 If at any point you would like to listen to your entire song so far, press the "Start Song" button.
 
-* Notes as numbers.
+* Notes as numbers: 
 Each number input into the sequencer is converted into a musical note based on that number's relative distance away from the bass sequence number. When the bass sequence number is 40, the base note is set at middle C. Any numbers entered into the sample sequence box will then be added or subtracted from middle C. For example, if you enter (0 -1 1 2) into your sample sequence with a bass number of 40, your notes will be (C B C# D) around the octave of middle C.
 Rests can be done by inputting "r" into the sample sequence.
-* Using the bass sequence box effectively
+* Using the bass sequence box effectively: 
 The bass sequence box can be used in the same idea as the sample sequence box. You can input a list of numbers such as 40 40 44 40 and it will make your current sample iterate through your sample sequence switching to the next bass number each time.
 
 ###Audio Effect Plugins
 Explain how the effect effects plugins work
+To use the built-in audio effect plugins, select what portion of the song you want the effect to go to work on by either choosing the entire song or your current selection using the first drop down menu next to the second graph down in the GUI. Next, use the drop down menu below it to choose what effect you would like. Hit the "Apply Effect" button and set your parameters inside the audio effect GUI. Press OKAY inside the audio effect GUI to apply the effect to the desired signal.
 
 ###Import Custom Effects and Tones
-
+A great feature of this app is that it allows you to import your own custom tones and effects. It's easy! Here's a few steps to get this to work:
+* Create your custom effect or tone m-file and save it in the same MATLAB directory that the app is running in. Make sure that if you are making a custom effect that you also make a GUI to go with it.
+* For the custom effects, file names must be in the format: [delayname]GUI
+* For the custom tones, you can name the m-file anything you would like
+* To load your custom tone into the app, all you have to do is add another line of text into the Waveform Select dropdown menu. For example, if you want to add your custom tone DampedTechno, just add in the text "DampedTechno" on a new line in the dropdown menu.
+* To load in a custom effect, the same step is taken as the custom tone. The only difference is the different dropdown menu and the text must be in the format [delayname]. Do NOT include the "GUI" text at the end of the file name.
 
 ###Exporting Songs
 To export your creation, simply press the Export button in the bottom right of the User Interface.
