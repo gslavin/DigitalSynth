@@ -21,7 +21,7 @@ If you want to move on to a new block of the song, press the "Append" button. Th
 NOTE: When working on a new block, always remember to press the "Reset Sample" button, unless you wish to include your entire previous block's signal in your next block.
 If at any point you would like to listen to your entire song so far, press the "Start Song" button.
 
-* Notes as numbers
+* Notes as numbers.
 Each number input into the sequencer is converted into a musical note based on that number's relative distance away from the bass sequence number. When the bass sequence number is 40, the base note is set at middle C. Any numbers entered into the sample sequence box will then be added or subtracted from middle C. For example, if you enter (0 -1 1 2) into your sample sequence with a bass number of 40, your notes will be (C B C# D) around the octave of middle C.
 Rests can be done by inputting "r" into the sample sequence.
 * Using the bass sequence box effectively
