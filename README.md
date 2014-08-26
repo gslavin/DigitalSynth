@@ -2,6 +2,23 @@
 
 A digital synthesizer and audio editor programmed in matlab.
 
+#EPED Requirements
+##Basic features
+* Quadruple threshold detection
+* Setup serial port (serial port auto-find)
+* Calibrate (and recalibrate if required)
+* Start and stop reading sensor values
+* Filtering noise out of sensor values
+* Visualization
+* Close serial port
+
+##Advanced Features
+* Dynamic loading of tones and plugins
+* Matlab Synthesizer/Sequencer utility
+* Accelerometer controlled UI (Accelerometer manipulates any slider)
+* Plugin framework
+* Wave visualization
+
 ##Main Features
 * Customize your tone using the two onscreen oscilators.
 * Create your own custom riffs using the built in sequencer.
