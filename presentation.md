@@ -27,11 +27,10 @@
 
 ##Advanced Features
 * Dynamic loading of tones and plugins
-* Matlab Synthizizer utility
+* Matlab Synthesizer/Sequencer utility
 * Accelerometer controlled UI (Accelerometer manipulates any slider)
 * Plugin framework
 * Wave visualization
-
 
 #Limitations
 * Plugins cannot be manipulated by accelerometer
