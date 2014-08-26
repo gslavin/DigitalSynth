@@ -27,4 +27,8 @@
 * Plugin framework
 * Wave visualization
 #Limitations
+* Plugins cannot be manipulated by accelerometer
+* Limited Undo capability
+* Workspace cannot be saved
+* Only the current block can be edited
 
