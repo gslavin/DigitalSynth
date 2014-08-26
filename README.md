@@ -28,7 +28,6 @@ Rests can be done by inputting "r" into the sample sequence.
 The bass sequence box can be used in the same idea as the sample sequence box. You can input a list of numbers such as 40 40 44 40 and it will make your current sample iterate through your sample sequence switching to the next bass number each time.
 
 ###Audio Effect Plugins
-Explain how the effect effects plugins work
 To use the built-in audio effect plugins, select what portion of the song you want the effect to go to work on by either choosing the entire song or your current selection using the first drop down menu next to the second graph down in the GUI. Next, use the drop down menu below it to choose what effect you would like. Hit the "Apply Effect" button and set your parameters inside the audio effect GUI. Press OKAY inside the audio effect GUI to apply the effect to the desired signal.
 
 ###Import Custom Effects and Tones
