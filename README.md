@@ -3,6 +3,9 @@
 A digital synthesizer and audio editor programmed in matlab.
 Run the app by going into the GUI folder and running testGUI.m
 
+# For a helpful video tutorial on how to use the app:
+Visit: https://www.youtube.com/watch?v=atc7E_2ppZg&feature=youtu.be
+
 #EPED Requirements
 ##Basic features
 * Quadruple threshold detection
