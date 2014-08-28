@@ -1,6 +1,7 @@
 #DigitalSynth
 
 A digital synthesizer and audio editor programmed in matlab.
+Run the app by going into the GUI folder and running testGUI.m
 
 #EPED Requirements
 ##Basic features
