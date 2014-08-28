@@ -1,6 +1,5 @@
 function [ output_sig ] = AppendSignals(sig1, sig2)
-%UNTITLED5 Summary of this function goes here
-%   Detailed explanation goes here
+% appends the signals together
 output_sig = [sig1 sig2];
 
 end

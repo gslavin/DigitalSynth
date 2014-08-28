@@ -1,3 +1,4 @@
+% George Slavin and Colby Bennett - Group 5 Section 62
 function varargout = DelayGUI(varargin)
 % DelayGUI MATLAB code for DelayGUI.fig
 %      DelayGUI, by itself, creates a new DelayGUI or raises the existing

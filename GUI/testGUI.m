@@ -1,32 +1,10 @@
 % George Slavin and Colby Bennett - Group 5 Section 62
 function varargout = testGUI(varargin)
-% TESTGUI MATLAB code for testGUI.fig
-%      TESTGUI, by itself, creates a new TESTGUI or raises the existing
-%      singleton*.
-%
-%      H = TESTGUI returns the handle to a new TESTGUI or the handle to
-%      the existing singleton*.
-%
-%      TESTGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in TESTGUI.M with the given input arguments.
-%
-%      TESTGUI('Property','Value',...) creates a new TESTGUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before testGUI_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to testGUI_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
 
 addpath('../SoundAPI/')
 addpath('../Plugins/')
 
-% Edit the above text to modify the response to help testGUI
-
-% Last Modified by GUIDE v2.5 21-Aug-2014 23:30:20
+% Last Modified by GUIDE v2.5 28-Aug-2014 17:29:40
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -49,14 +27,10 @@ end
 
 % --- Executes just before testGUI is made visible.
 function testGUI_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to testGUI (see VARARGIN)
 
 %initialize comport variables
 handles.setupState = 0;
+%initializes globals
 global thresholdFlag;
 thresholdFlag = 0;
 global overThresholdFlag;
@@ -86,12 +60,13 @@ osc2.amplitude = .2;
 osc2.damping = 0.1;
 osc2.detuning = 0;
 
+% initialize overall volume state
 global volume;
 volume.type = 'Volume';
 volume.sliderName = 'volumeSlider';
 volume.textName = 'volumeText';
 
-% TODO: allowing the user to control alpha is a bad idea
+% initialize alpha value state
 global alpha;
 alpha.type = 'Alpha';
 alpha.sliderName = 'filterSlider';
@@ -128,6 +103,7 @@ set(handles.osc2Slider,'Value',.2);
 % Choose default command line output for testGUI
 handles.output = hObject;
 
+% place in an image of a synth knob
 axes(handles.knob1);
 imshow('macro-knob.jpg');
 
@@ -152,25 +128,14 @@ end
 
 % --- Outputs from this function are returned to the command line.
 function varargout = testGUI_OutputFcn(hObject, eventdata, handles)
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
 % --- Executes on button press in GoButton.
 function GoButton_Callback(hObject, eventdata, handles)
-% hObject    handle to GoButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% intialize buffers to zero
-% pull data from audino
-% calc mag stuff
-% plot
-
+% pull in required globals
 global dataFlag;
 dataFlag = 1;
 global sampleStartFlag;
@@ -208,6 +173,7 @@ else
         % calls the axes from the AccelPlot
         axes(handles.AccelPlot); 
         
+        % filters the gx values
         gxFiltered = gx*(1-handles.alpha) + gxdataFiltered(end)*(handles.alpha);
 
         gxdataFiltered = [gxdataFiltered(2:end) ; gxFiltered]; % updates the plot for x
@@ -225,6 +191,7 @@ else
             threshold2Data = thresh2Val*ones(buf_len,1);
             threshold3Data = thresh3Val*ones(buf_len,1);
             threshold4Data = thresh4Val*ones(buf_len,1);
+            % plots the threshold lines
             plot(index,gxdataFiltered,'b',index,threshold1Data,...
                 'm',index,threshold2Data,'k',index,threshold3Data,...
                 'c',index,threshold4Data,'g');
@@ -252,6 +219,7 @@ else
         end
 
         guidata(hObject, handles);
+        % TODO - Comment on this section below here
         if (sampleStartFlag == 1 &&...
             (isempty(sampleAudio) || strcmp(sampleAudio.running, 'off')));
             sampleAudio = playUserSample(handles);
@@ -264,6 +232,7 @@ else
 end
 
 % Helper Functions
+% TODO - explain some of these helper functions
 function [currentOsc] = updateOscillatorState(handles, currentOsc)
 global osc1;
 global osc2;
@@ -281,6 +250,7 @@ else
    osc2 = currentOsc;
 end
 
+% function that actually plays the audio
 function [audio] = playSong(handles)
     global song;
     volume = get(handles.volumeSlider, 'Value');
@@ -344,7 +314,7 @@ function [tone] = getToneFunction(handles, waveSelMenu)
     tone = str2func(funcName);
     
     
-
+% Our quadruple threshold detection actually happens in this function
 function [handles] = updateSlider(handles, control, filterValue)
 sliderName = control.sliderName;
 increment = 0;
@@ -374,6 +344,7 @@ elseif (sliderVal > 1)
 end
 set(handles.(sliderName),'Value',sliderVal);
 
+% this function updates any text from the value of the slider
 function [handles] = updateSliderText(handles, currentControl)
 if (strcmp(currentControl.type, 'Osc'))
     setting = handles.(currentControl.settingName);
@@ -431,9 +402,6 @@ delete(handles.figure1)
 
 % --- Executes when the stop button is pushed in the GUI
 function StopButton_Callback(hObject, eventdata, handles)
-% hObject    handle to StopButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 % calls the global dataFlag into the function and sets it to 0, stopping
 % the rolling plot which is a while loop for when dataFlag equals 1
@@ -488,34 +456,25 @@ guidata(hObject, handles);
 
 % --- Executes when the close serial button is pressed in the GUI
 function closeSerialButton_Callback(hObject, eventdata, handles)
-% hObject    handle to closeSerialButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 closeSerial; % uses the closeSerial command
 
 
 % --- Executes on slider movement.
 function filterSlider_Callback(hObject, eventdata, handles)
-% hObject    handle to filterSlider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 % TODO: allowing the user to control alpha is a bad idea
 % global currentControl;
 % global alpha;
 % currentControl = alpha;
 
+% gets the value from the filter slider and sets the text to the value
 handles.alpha = get(handles.filterSlider, 'Value');
 set(handles.filterText, 'String', ['Alpha value: ' num2str(handles.alpha)]);
 guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function filterSlider_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to filterSlider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
 
 % Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -525,68 +484,31 @@ end
 guidata(hObject, handles);
 
 
-
+% TODO - do we need these functions below??
 function sample1_Callback(hObject, eventdata, handles)
-% hObject    handle to sample1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of sample1 as text
-%        str2double(get(hObject,'String')) returns contents of sample1 as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function sample1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to sample1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
 function bass1_Callback(hObject, eventdata, handles)
-% hObject    handle to bass1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of bass1 as text
-%        str2double(get(hObject,'String')) returns contents of bass1 as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function bass1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to bass1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
 function speed1_Callback(hObject, eventdata, handles)
-% hObject    handle to speed1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of speed1 as text
-%        str2double(get(hObject,'String')) returns contents of speed1 as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function speed1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to speed1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -594,24 +516,16 @@ end
 
 % --- Executes on selection change in waveformSelect1.
 function waveformSelect1_Callback(hObject, eventdata, handles)
-% hObject    handle to waveformSelect1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns waveformSelect1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from waveformSelect1
+% calls the globals in and sets the current control to oscillator 1 when
+% the waveform select 1 is hit
 global currentControl;
 global osc1;
 currentControl = osc1;
 
 % --- Executes during object creation, after setting all properties.
 function waveformSelect1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to waveformSelect1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -619,12 +533,8 @@ end
 
 % --- Executes on selection change in settingSelect1.
 function settingSelect1_Callback(hObject, eventdata, handles)
-% hObject    handle to settingSelect1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns settingSelect1 contents as cell array
-            % updates the slider at the bottom for current oscillator
+% updates the slider at the bottom for current oscillator
 global currentControl;
 global osc1;
 currentControl = osc1;
@@ -646,12 +556,7 @@ guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function settingSelect1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to settingSelect1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -659,9 +564,9 @@ end
 
 % --- Executes on slider movement.
 function osc1Slider_Callback(hObject, eventdata, handles)
-% hObject    handle to osc1Slider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
+% calls in globals and sets the current control to osc1 when when the osc 1
+% slider is hit
 global currentControl;
 global osc1;
 currentControl = osc1;
@@ -670,11 +575,7 @@ currentControl = osc1;
 
 % --- Executes during object creation, after setting all properties.
 function osc1Slider_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to osc1Slider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
@@ -682,9 +583,7 @@ end
 
 % --- Executes on button press in sampleStart.
 function sampleStart_Callback(hObject, eventdata, handles)
-% hObject    handle to sampleStart (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 global sampleStartFlag;
 global sampleAudio;
 global songStartFlag;
@@ -715,24 +614,16 @@ guidata(hObject, handles);
 
 % --- Executes on selection change in waveformSelect2.
 function waveformSelect2_Callback(hObject, eventdata, handles)
-% hObject    handle to waveformSelect2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns waveformSelect2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from waveformSelect2
+% calls in globals and sets currentControl to the osc2 - when waveform
+% select for oscillator 2 is hit
 global currentControl;
 global osc2;
 currentControl = osc2;
 
 % --- Executes during object creation, after setting all properties.
 function waveformSelect2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to waveformSelect2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -740,12 +631,8 @@ end
 
 % --- Executes on selection change in settingSelect2.
 function settingSelect2_Callback(hObject, eventdata, handles)
-% hObject    handle to settingSelect2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns settingSelect2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from settingSelect2
+% sets the currentControl to osc2 when setting select 2 is hit
 global currentControl;
 global osc2;
 currentControl = osc2;
@@ -765,12 +652,7 @@ guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function settingSelect2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to settingSelect2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -778,23 +660,15 @@ end
 
 % --- Executes on slider movement.
 function osc2Slider_Callback(hObject, eventdata, handles)
-% hObject    handle to osc2Slider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+% sets currentControl to osc2 when osc2 slider is activated or moved
 global currentControl;
 global osc2;
 currentControl = osc2;
 
 % --- Executes during object creation, after setting all properties.
 function osc2Slider_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to osc2Slider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
@@ -802,12 +676,13 @@ end
 
 % --- Executes on button press in addButton.
 function addButton_Callback(hObject, eventdata, handles)
-% hObject    handle to addButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 global currentSongBlock;
 global currentMelody;
 global sampleStartFlag;
+% adds the melody created to the current song block you are on - layering
+% sounds on top of other sounds if you already have a sound in the current
+% song block
 currentSongBlock = AddSignals(currentSongBlock, currentMelody);
 % current sequence
 % stops the audio from running and resets the start button if it is pushed
@@ -822,12 +697,11 @@ waveformSelect_Callback(hObject, eventdata, handles);
 
 % --- Executes on button press in appendButton.
 function appendButton_Callback(hObject, eventdata, handles)
-% hObject    handle to appendButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 global song;
 global currentSongBlock;
 global sampleStartFlag;
+% appends the curent block to the end of the entire song
 song = AppendSignals(song, currentSongBlock);
 volume = get(handles.volumeSlider, 'Value');
 if (get(handles.waveformSelect, 'Value') == 1)
@@ -846,32 +720,20 @@ waveformSelect_Callback(hObject, eventdata, handles);
 
 % --- Executes on button press in exportButton.
 function exportButton_Callback(hObject, eventdata, handles)
-% hObject    handle to exportButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
+% exports the entire song as a WAV file using audiowrite function
 global song;
 filename = get(handles.exportText, 'String');
 audiowrite([filename '.wav'], song, 8000)
 msgbox([filename '.wav has been saved'])
 
-
+% TODO - do we need this function??
 function exportText_Callback(hObject, eventdata, handles)
-% hObject    handle to exportText (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of exportText as text
-%        str2double(get(hObject,'String')) returns contents of exportText as a double
 
 
 % --- Executes during object creation, after setting all properties.
 function exportText_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to exportText (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -879,9 +741,7 @@ end
 
 % --- Executes on button press in songButton.
 function songButton_Callback(hObject, eventdata, handles)
-% hObject    handle to songButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 global songStartFlag;
 global songAudio;
 global sampleStartFlag;
@@ -912,9 +772,8 @@ guidata(hObject, handles);
 
 % --- Executes on button press in resetSongButton.
 function resetSongButton_Callback(hObject, eventdata, handles)
-% hObject    handle to resetSongButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
+% erases the whole song
 global song;
 song = [0];
 % sets the current view on the waveform graph to the whole song
@@ -926,9 +785,8 @@ plot(NormalizeSignal(song))
 
 % --- Executes on button press in resetSample.
 function resetSample_Callback(hObject, eventdata, handles)
-% hObject    handle to resetSample (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
+% erases the current song block
 global currentSongBlock;
 currentSongBlock = [0];
 % sets the current view on the waveform graph to current sample
@@ -937,13 +795,9 @@ waveformSelect_Callback(hObject, eventdata, handles);
 
 % --- Executes on slider movement.
 function volumeSlider_Callback(hObject, eventdata, handles)
-% hObject    handle to volumeSlider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+% sets the current control to volume to change the overall volume when the
+% slider is hit
 global currentControl;
 global volume;
 currentControl = volume;
@@ -955,56 +809,40 @@ currentControl = volume;
 
 % --- Executes during object creation, after setting all properties.
 function volumeSlider_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to volumeSlider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-
+% TODO - do we need this function?
 % --- Executes on button press in muteSequence.
 function muteSequence_Callback(hObject, eventdata, handles)
-% hObject    handle to muteSequence (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of muteSequence
 
 
 % --- Executes on selection change in waveformSelect.
 function waveformSelect_Callback(hObject, eventdata, handles)
-% hObject    handle to waveformSelect (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns waveformSelect contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from waveformSelect
 global song;
 global currentSongBlock;
 axes(handles.WavePlot)
 select = get(handles.waveformSelect, 'Value');
 volume = get(handles.volumeSlider, 'Value');
 
+% plots either the song or the current song block based on what the
+% waveform select is set on next to the graph
 switch(select)
     case 1
         plotData = song;
     case 2
         plotData = currentSongBlock;
 end
+% normalizes the signal and plots it
 plot(volume*NormalizeSignal(plotData))
 ylim([-1 1])
 
 % --- Executes during object creation, after setting all properties.
 function waveformSelect_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to waveformSelect (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -1012,36 +850,25 @@ end
 
 % --- Executes on selection change in effectMenu.
 function effectMenu_Callback(hObject, eventdata, handles)
-% hObject    handle to effectMenu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns effectMenu contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from effectMenu
 waveformSelect_Callback(hObject, eventdata, handles); % update the waveform graph
 
 % --- Executes during object creation, after setting all properties.
 function effectMenu_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to effectMenu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
 % --- Executes on button press in effectButton.
 function effectButton_Callback(hObject, eventdata, handles)
-% hObject    handle to effectButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 global currentSongBlock;
 global song;
 audio = [];
 songSelect = get(handles.waveformSelect,'Value');
+% sets up whether the effect will edit the entire song or the current
+% selection
 switch songSelect
     case 1 
         audio = song;
@@ -1055,8 +882,12 @@ valIndex = get(handles.effectMenu, 'Value');
 valueName = valueName{valIndex};
 % remove newlines on last entry
 valueName = strtrim(valueName);
+% pulls in the current effect name selected in the dropdown and uses the
+% function - sends in the current audio and gets back the effect audio
 funcName = str2func(strcat(valueName,'GUI'));
 audio = funcName(audio);
+% based on the overall waveform selected, it sets the whole song or the
+% current selection to the updated effect signal
 switch songSelect
     case 1 
         song = audio;
@@ -1065,21 +896,13 @@ switch songSelect
 end
 waveformSelect_Callback(hObject, eventdata, handles); 
 
-
+% TODO - do we need this function?
 % --- Executes on button press in muteCurrentBlock.
 function muteCurrentBlock_Callback(hObject, eventdata, handles)
-% hObject    handle to muteCurrentBlock (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of muteCurrentBlock
-
 
 % --- Executes on button press in thresholdButton.
 function thresholdButton_Callback(hObject, eventdata, handles)
-% hObject    handle to thresholdButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 % Declares global
 global thresholdFlag;
 % Gets the string attached to thresholdOn and stores it
@@ -1096,26 +919,20 @@ else
     % set threshold text to on, take display off graph
 end
 
-
-
-
+% TODO - do we need this function?
 function comPort_Callback(hObject, eventdata, handles)
-% hObject    handle to comPort (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of comPort as text
-%        str2double(get(hObject,'String')) returns contents of comPort as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function comPort_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to comPort (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in instructionsButton.
+function instructionsButton_Callback(hObject, eventdata, handles)
+% sets up a message box with basic instructions on how to get started if
+% the user presses it.
+uiwait(msgbox('Begin by pressing the initialize button and follow the prompts. Before anything is done with the sequencer at the bottom, you must press the GO! button! Slide the alpha filter value up for a smooth filtered response. The accelerometer is used to move the sliders for the overall volume in the bottom center of the app as well as the two sliders under each oscillator. This should be enough to get you started. For further instructions on how to customize tones and work on a song, view the readME file and the tutorial video link in the readME in the project folder!'));
+uiresume;

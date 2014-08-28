@@ -1,3 +1,4 @@
+% George Slavin and Colby Bennett - Group 5 Section 62
 function varargout = NormalizeGUI(varargin)
 % NormalizeGUI MATLAB code for NormalizeGUI.fig
 %      NormalizeGUI, by itself, creates a new NormalizeGUI or raises the existing
