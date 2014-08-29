@@ -733,8 +733,9 @@ function exportButton_Callback(hObject, eventdata, handles)
 % exports the entire song as a WAV file using audiowrite function
 global song;
 filename = get(handles.exportText, 'String');
-audiowrite([filename '.wav'], song, 8000)
-msgbox([filename '.wav has been saved'])
+audiowrite(['../songs/' filename '.wav'], song, 8000)
+uiwait(msgbox([filename '.wav has been saved to the ./songs folder']))
+uiresume
 
 % UI element requires a defined callback
 function exportText_Callback(hObject, eventdata, handles)
