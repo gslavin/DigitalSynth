@@ -1,6 +1,5 @@
+% Defines an envelope function and multiplies the signal by that envelope
 function [ output_sig] = Envelope(sig, levels, pivots)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
     if (length(levels) ~= length(pivots))
         error('levels must be same length as pivots')
     end

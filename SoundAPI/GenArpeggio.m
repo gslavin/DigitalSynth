@@ -1,3 +1,4 @@
+% Uses GenChordSeq to easily generate arpeggios of a certain chord
 function [ sig ] = GenArpeggio(base, type, duration, volume)
     if strcmp(type,'maj')
         seq = [base base+4 base+7 base+4];

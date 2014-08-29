@@ -1,3 +1,6 @@
+% The main sythesis function.
+% Allows the user to enter several sequences qhich are that played
+% together as chords
 function [ output_sig ] = GenChordSeq(seq, duration, volume, damping, wave_type)
     [seg_rows, seg_columns] = size(seq);
     % set optional args

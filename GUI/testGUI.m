@@ -96,7 +96,7 @@ songAudio = [];
 
 
 
-%initialize setting select values TODO
+%initialize setting select values
 set(handles.osc1Slider,'Value',.2);
 set(handles.osc2Slider,'Value',.2);
 
@@ -211,6 +211,8 @@ else
             % Update the text of the slider
             handles = updateSliderText(handles, currentControl);
 
+            % Only update the oscillator state if the current slider
+            % belongs to an oscillator
             currentControl = updateOscillatorState(handles, currentControl);
         else
             handles = updateSlider(handles, currentControl,...
@@ -219,7 +221,8 @@ else
         end
 
         guidata(hObject, handles);
-        % TODO - Comment on this section below here
+        % The audio should only be triggered if no audio is currently
+        % playing.
         if (sampleStartFlag == 1 &&...
             (isempty(sampleAudio) || strcmp(sampleAudio.running, 'off')));
             sampleAudio = playUserSample(handles);
@@ -232,7 +235,9 @@ else
 end
 
 % Helper Functions
-% TODO - explain some of these helper functions
+
+% Updates the current oscillator state using the value
+% from the slider that is currenting in focus
 function [currentOsc] = updateOscillatorState(handles, currentOsc)
 global osc1;
 global osc2;
@@ -250,13 +255,15 @@ else
    osc2 = currentOsc;
 end
 
-% function that actually plays the audio
+% Plays the audio for the entire song
+% and returns the associated audioplayer object
 function [audio] = playSong(handles)
     global song;
     volume = get(handles.volumeSlider, 'Value');
     song = volume*NormalizeSignal(song);
     audio = PlaySignal(song);
 
+% Translates the user sequence into audio data 
 function [output_sig] = genUserSample(handles)
 global osc1;
 global osc2;
@@ -277,6 +284,7 @@ for base = base
     output_sig = AppendSignals(output_sig, melody);
 end
 
+% Retrieves the user sequence from the GUI
 function [seq] = getSequence(textBox)
     seqString = get(textBox, 'String');
     disp('string stuff')
@@ -284,7 +292,9 @@ function [seq] = getSequence(textBox)
     seq = sscanf(seqString, '%f');
     seq = seq';
  
-% TODO: current sample must be played to be generated
+% Plays the current user sample
+% Current sample must be played to be generated
+% Returns the associated audioplayer object
 function [audio] = playUserSample(handles)
 global currentMelody;
 global currentSongBlock;
@@ -305,6 +315,9 @@ volume = get(handles.volumeSlider, 'Value');
 output_sig = volume*NormalizeSignal(output_sig);
 audio = PlaySignal(output_sig);
 
+% Uses the currently slected tone name to function
+% the correct tone function
+% returns the proper tone function
 function [tone] = getToneFunction(handles, waveSelMenu)
     funcName = get(handles.(waveSelMenu), 'String');
     valIndex = get(handles.(waveSelMenu), 'Value');
@@ -314,7 +327,8 @@ function [tone] = getToneFunction(handles, waveSelMenu)
     tone = str2func(funcName);
     
     
-% Our quadruple threshold detection actually happens in this function
+% Updates the value of the current slider
+% update increment depends on 4 thresholds
 function [handles] = updateSlider(handles, control, filterValue)
 sliderName = control.sliderName;
 increment = 0;
@@ -344,7 +358,7 @@ elseif (sliderVal > 1)
 end
 set(handles.(sliderName),'Value',sliderVal);
 
-% this function updates any text from the value of the slider
+% Updates any text from the value of the slider
 function [handles] = updateSliderText(handles, currentControl)
 if (strcmp(currentControl.type, 'Osc'))
     setting = handles.(currentControl.settingName);
@@ -463,11 +477,6 @@ closeSerial; % uses the closeSerial command
 % --- Executes on slider movement.
 function filterSlider_Callback(hObject, eventdata, handles)
 
-% TODO: allowing the user to control alpha is a bad idea
-% global currentControl;
-% global alpha;
-% currentControl = alpha;
-
 % gets the value from the filter slider and sets the text to the value
 handles.alpha = get(handles.filterSlider, 'Value');
 set(handles.filterText, 'String', ['Alpha value: ' num2str(handles.alpha)]);
@@ -484,7 +493,7 @@ end
 guidata(hObject, handles);
 
 
-% TODO - do we need these functions below??
+% UI element requires a defined callback
 function sample1_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
@@ -727,7 +736,7 @@ filename = get(handles.exportText, 'String');
 audiowrite([filename '.wav'], song, 8000)
 msgbox([filename '.wav has been saved'])
 
-% TODO - do we need this function??
+% UI element requires a defined callback
 function exportText_Callback(hObject, eventdata, handles)
 
 
@@ -802,11 +811,6 @@ global currentControl;
 global volume;
 currentControl = volume;
 
-% TODO: remove when new dynamic controls work
-%volume = get(handles.volumeSlider, 'Value');
-%set(handles.volumeText, 'String', ['Volume: ' num2str(volume)])
-
-
 % --- Executes during object creation, after setting all properties.
 function volumeSlider_CreateFcn(hObject, eventdata, handles)
 
@@ -814,7 +818,7 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-% TODO - do we need this function?
+% UI element requires a defined callback
 % --- Executes on button press in muteSequence.
 function muteSequence_Callback(hObject, eventdata, handles)
 
@@ -875,18 +879,18 @@ switch songSelect
     case 2
         audio = currentSongBlock;
 end
-% TODO: calls appropriate effect GUI
+% Calls appropriate effect GUI
 valueName = get(handles.effectMenu, 'String');
 valIndex = get(handles.effectMenu, 'Value');
 % Get current setting name
 valueName = valueName{valIndex};
-% remove newlines on last entry
+% Remove newlines on last entry
 valueName = strtrim(valueName);
-% pulls in the current effect name selected in the dropdown and uses the
-% function - sends in the current audio and gets back the effect audio
+% Pulls in the current effect name selected in the dropdown and uses the
+% Function - sends in the current audio and gets back the effect audio
 funcName = str2func(strcat(valueName,'GUI'));
 audio = funcName(audio);
-% based on the overall waveform selected, it sets the whole song or the
+% Based on the overall waveform selected, it sets the whole song or the
 % current selection to the updated effect signal
 switch songSelect
     case 1 
@@ -896,7 +900,7 @@ switch songSelect
 end
 waveformSelect_Callback(hObject, eventdata, handles); 
 
-% TODO - do we need this function?
+% UI element requires a defined callback
 % --- Executes on button press in muteCurrentBlock.
 function muteCurrentBlock_Callback(hObject, eventdata, handles)
 
@@ -919,7 +923,7 @@ else
     % set threshold text to on, take display off graph
 end
 
-% TODO - do we need this function?
+% UI element requires a defined callback
 function comPort_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.

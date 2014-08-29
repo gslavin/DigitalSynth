@@ -1,3 +1,5 @@
+% Expands volume and damping parameters so the user doesn't have to
+% supply volume and damping info for every note
 function [ param ] = expandParamMatrix(param, seg_rows, seg_columns)
     
     [vol_rows, vol_columns] = size(param);
